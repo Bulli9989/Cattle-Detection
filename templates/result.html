@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CattleVision — Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --soil:    #2b1d0e;
+      --earth:   #5c3d1e;
+      --clay:    #a0622a;
+      --straw:   #e8c97a;
+      --cream:   #f5edd8;
+      --grass:   #4a7c3f;
+      --sky:     #7fb3c8;
+      --off:     #1a1008;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--off);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: 0.35;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid rgba(232,201,122,0.15);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: var(--straw);
+      text-decoration: none;
+    }
+    .logo span { color: var(--clay); font-style: italic; }
+
+    .back-link {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--clay);
+      text-decoration: none;
+      border: 1px solid rgba(160,98,42,0.4);
+      padding: 0.25rem 0.7rem;
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .back-link:hover { color: var(--straw); border-color: var(--straw); }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* Left — image */
+    .image-col {}
+
+    .result-img {
+      width: 100%;
+      border-radius: 4px;
+      display: block;
+      border: 1px solid rgba(232,201,122,0.15);
+    }
+
+    .top-prediction {
+      margin-top: 1.5rem;
+      background: rgba(92,61,30,0.25);
+      border: 1px solid rgba(232,201,122,0.15);
+      border-radius: 4px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .tp-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 0.4rem;
+    }
+
+    .tp-breed {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--straw);
+      line-height: 1.1;
+    }
+
+    .tp-prob {
+      font-size: 0.75rem;
+      color: var(--grass);
+      margin-top: 0.3rem;
+      letter-spacing: 0.1em;
+    }
+
+    .uncertain-banner {
+      margin-top: 1.5rem;
+      background: rgba(180,60,40,0.2);
+      border: 1px solid rgba(220,80,60,0.5);
+      border-radius: 4px;
+      padding: 0.8rem 1.1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: #f4a490;
+    }
+
+    .top-prediction.uncertain {
+      border-color: rgba(220,80,60,0.4);
+      opacity: 0.75;
+    }
+
+    .top-prediction.uncertain .tp-breed {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    /* Right — predictions */
+    .predictions-col {}
+
+    .preds-header {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(232,201,122,0.1);
+    }
+
+    .pred-item {
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    {% for i in range(5) %}
+    .pred-item:nth-child({{ i + 1 }}) { animation-delay: {{ i * 0.08 }}s; }
+    {% endfor %}
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pred-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.4rem;
+    }
+
+    .pred-name {
+      font-size: 0.78rem;
+      color: var(--cream);
+      letter-spacing: 0.03em;
+    }
+    .pred-item.top .pred-name { color: var(--straw); font-weight: 400; }
+
+    .pred-prob {
+      font-size: 0.65rem;
+      color: var(--clay);
+      font-variant-numeric: tabular-nums;
+    }
+    .pred-item.top .pred-prob { color: var(--grass); }
+
+    .bar-track {
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--clay);
+      width: 0;
+      animation: barGrow 0.7s ease forwards;
+    }
+    .pred-item.top .bar-fill { background: var(--straw); }
+
+    @keyframes barGrow {
+      to { width: var(--target-w); }
+    }
+
+    /* Divider */
+    .result-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: rgba(232,201,122,0.08);
+    }
+
+    /* Try again */
+    .try-again {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.85rem 1.8rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 3px;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary { background: var(--clay); color: var(--off); }
+    .btn-primary:hover { background: var(--straw); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--clay);
+      border: 1px solid rgba(160,98,42,0.5);
+    }
+    .btn-outline:hover { border-color: var(--straw); color: var(--straw); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">Cattle<span>Vision</span></a>
+    <a href="/" class="back-link">← New image</a>
+  </header>
+
+  <main>
+    <!-- Left -->
+    <div class="image-col">
+      <img class="result-img" src="{{ image_data }}" alt="Uploaded cattle" />
+      {% if uncertain %}
+      <div class="uncertain-banner">
+        ⚠ Unpredictable — model confidence too low to identify breed
+      </div>
+      {% endif %}
+      <div class="top-prediction {% if uncertain %}uncertain{% endif %}">
+        <p class="tp-label">Top prediction</p>
+        <p class="tp-breed">{{ top_breed }}</p>
+        <p class="tp-prob">{{ top_prob }}% confidence</p>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="predictions-col">
+      <p class="preds-header">Top-5 breed predictions</p>
+
+      {% for pred in predictions %}
+      <div class="pred-item {% if loop.first %}top{% endif %}">
+        <div class="pred-row">
+          <span class="pred-name">{{ pred.breed }}</span>
+          <span class="pred-prob">{{ pred.prob }}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="--target-w: {{ pred.prob }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="result-divider"></div>
+
+    <div class="try-again">
+      <a href="/" class="btn btn-primary">Identify another</a>
+      <a href="/" class="btn btn-outline">Back to home</a>
+    </div>
+  </main>
+</body>
+</html>

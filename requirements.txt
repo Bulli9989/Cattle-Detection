@@ -1,0 +1,6 @@
+flask>=3.0
+torch>=2.0
+torchvision>=0.15
+timm>=0.9
+Pillow>=10.0
+numpy>=1.24
