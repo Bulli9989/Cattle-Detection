@@ -26,3 +26,30 @@ An AI-powered web application that identifies cattle and buffalo breeds from ima
 ---
 
 ## 📂 Project Structure
+project-root/
+│
+├── frontend/ # React UI
+├── backend/ # Flask server
+├── model/ # Trained model files
+├── static/ # Images / assets
+├── templates/ # HTML templates (if Flask)
+├── history/ # Stored predictions
+├── app.py # Main backend file
+├── requirements.txt # Dependencies
+└── README.md
+
+## Model Details
+Model: EfficientNetV2-M
+Dataset: 10 Indigenous breeds
+Input: Image (JPEG/PNG)
+Output:
+Top-5 predicted breeds
+Confidence scores
+
+## Future Improvements
+📱 Mobile app integration
+🌍 Cloud deployment (AWS/GCP)
+📈 Model accuracy improvements
+🐾 More breed categories
+🔎 Real-time camera detection
+
